@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+    # The native engine has its own workflow (engine.yml).
+    paths-ignore:
+      - "engine/**"
+      - ".github/workflows/engine.yml"
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - "engine/**"
+      - ".github/workflows/engine.yml"
+
+# Superseded pull-request runs are cancelled; pushes to main and dev finish.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  frontend:
+    name: Frontend — install, lint, typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type-check
+        run: pnpm check
+
+      - name: Unit tests
+        run: pnpm test
+
+  rust:
+    name: Rust — cargo check
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stable Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: cargo check
+        working-directory: src-tauri
+        env:
+          SQLX_OFFLINE: "true"
+        run: cargo check --all-targets
+
+      - name: Rust unit and integration tests
+        working-directory: src-tauri
+        env:
+          SQLX_OFFLINE: "true"
+        run: cargo test

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE engines\n            SET path = ?2 || substr(path, length(?1) + 1)\n          WHERE substr(path, 1, length(?1)) = ?1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "d2a369f94010c024bac70edba2edefe123dbe9a65382f1ad290f390876e6e515"
+}

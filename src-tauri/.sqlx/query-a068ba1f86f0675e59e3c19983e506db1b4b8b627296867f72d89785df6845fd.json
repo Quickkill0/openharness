@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT system_prompt, sampling_json, load_config_json\n         FROM conversation_settings WHERE conversation_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "system_prompt",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "sampling_json",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "load_config_json",
+        "ordinal": 2,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "a068ba1f86f0675e59e3c19983e506db1b4b8b627296867f72d89785df6845fd"
+}

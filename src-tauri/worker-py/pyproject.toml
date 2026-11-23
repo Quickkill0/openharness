@@ -1,0 +1,16 @@
+[project]
+name = "openharness-worker"
+version = "0.1.0"
+description = "OpenHarness Python worker — generation pipelines over JSON-Lines stdio"
+requires-python = ">=3.12"
+# Runtime dependencies are intentionally NOT listed here: the venv is built
+# from requirements.cuda.txt / requirements.cpu.txt (variant chosen by GPU
+# detection) and the worker core is stdlib-only.
+
+[tool.pyright]
+# The package is imported from this directory (PYTHONPATH=worker-py).
+include = ["openharness_worker", "tests"]
+executionEnvironments = [{ root = "." }]
+# Heavy deps (torch/diffusers/...) live only in the runtime venv built by
+# the Rust bootstrap — they are never installed in the dev environment.
+reportMissingImports = "none"

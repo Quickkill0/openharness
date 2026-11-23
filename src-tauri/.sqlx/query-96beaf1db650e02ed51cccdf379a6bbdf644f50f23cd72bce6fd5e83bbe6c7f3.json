@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM assets_fts WHERE asset_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "96beaf1db650e02ed51cccdf379a6bbdf644f50f23cd72bce6fd5e83bbe6c7f3"
+}

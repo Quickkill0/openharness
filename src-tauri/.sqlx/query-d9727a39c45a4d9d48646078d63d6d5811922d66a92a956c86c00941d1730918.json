@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM engines WHERE active = 0",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "d9727a39c45a4d9d48646078d63d6d5811922d66a92a956c86c00941d1730918"
+}

@@ -1,0 +1,52 @@
+# Node
+node_modules/
+.svelte-kit/
+build/
+dist/
+
+# pnpm
+.pnpm-store/
+
+# Rust / Cargo
+src-tauri/target/
+*.pdb
+
+# Python (worker-py)
+__pycache__/
+*.pyc
+src-tauri/worker-py/.venv/
+
+# Local sqlx compile-time check DB (offline cache lives in .sqlx/)
+src-tauri/dev.db
+
+# Tauri
+src-tauri/gen/
+
+# Local-only uploads / screenshots
+uploads/
+
+# SQLx offline query cache — commit the .sqlx/ directory itself
+# but not the target artifacts inside it
+# (keep .sqlx/ tracked)
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Editor
+.DS_Store
+Thumbs.db
+*.suo
+*.user
+.vscode/*.log
+
+# OS
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+Claude Code.bat
+/.claude

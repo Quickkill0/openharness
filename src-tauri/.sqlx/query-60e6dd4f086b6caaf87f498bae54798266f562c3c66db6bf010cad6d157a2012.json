@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO generation_jobs (id, task, status, params, created_at)\n           VALUES (?, ?, 'running', ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "60e6dd4f086b6caaf87f498bae54798266f562c3c66db6bf010cad6d157a2012"
+}

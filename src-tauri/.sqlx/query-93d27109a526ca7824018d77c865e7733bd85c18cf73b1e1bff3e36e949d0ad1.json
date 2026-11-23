@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE download_groups SET registration_closed = 1 WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "93d27109a526ca7824018d77c865e7733bd85c18cf73b1e1bff3e36e949d0ad1"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO conversation_settings\n            (conversation_id, system_prompt, sampling_json, load_config_json, updated_at)\n         VALUES (?, ?, ?, ?, ?)\n         ON CONFLICT(conversation_id) DO UPDATE SET\n            system_prompt = excluded.system_prompt,\n            sampling_json = excluded.sampling_json,\n            load_config_json = excluded.load_config_json,\n            updated_at = excluded.updated_at",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": []
+  },
+  "hash": "a8065a48e2887ef80b351429439014d7d9429ab53474fbc4a81dcba179b8f466"
+}

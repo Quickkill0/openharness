@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT g.id, d.repo_id, d.file FROM download_groups g\n         JOIN downloads d ON d.group_id = g.id WHERE g.format = 'gguf'",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "repo_id",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "file",
+        "ordinal": 2,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "8d718e310bdf320ac1c8150febcca1c9a0ba7a50474aae917710479586cc6c9d"
+}

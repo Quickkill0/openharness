@@ -1,0 +1,56 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, repo_id, revision, format, task, created_at, registration_closed AS \"registration_closed!: bool\"\n           FROM download_groups ORDER BY created_at ASC",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "repo_id",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "revision",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "format",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "task",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "created_at",
+        "ordinal": 5,
+        "type_info": "Integer"
+      },
+      {
+        "name": "registration_closed!: bool",
+        "ordinal": 6,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "b33ed7383f24e062d5cedb1d7c69a6c738f82ecd5d5628db4c04145a11d51f36"
+}

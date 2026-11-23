@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE model_files\n            SET path = ?2 || substr(path, length(?1) + 1)\n          WHERE substr(path, 1, length(?1)) = ?1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "b1676c01b82d55f7eeccb42339c58d4267195e4ffb87d72c7578ddfede9c2ea7"
+}

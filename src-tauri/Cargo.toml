@@ -1,0 +1,88 @@
+[package]
+name = "openharness"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.78"
+description = "OpenHarness — local-first AI workstation"
+license = "MIT"
+
+[lib]
+name = "openharness_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["protocol-asset"] }
+tauri-plugin-shell = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-store = "2"
+tauri-plugin-window-state = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio", "macros", "migrate", "chrono", "uuid"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "rustls-tls"] }
+thiserror = "2"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-appender = "0.2"
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+dirs = "5"
+# keyring v3 for Windows Credential Manager — used directly in auth commands
+# (tauri-plugin-keyring wraps this same crate; using it directly avoids JS plugin glue)
+keyring = { version = "3", features = ["windows-native"] }
+sha2 = "0.10"
+tokio-util = { version = "0.7", features = ["rt"] }
+futures = "0.3"
+bytes = "1"
+axum = "0.8"
+subtle = "2"
+if-addrs = "0.13"
+nvml-wrapper = "0.10"
+# Hardware profile for the load planner: system RAM, the models drive, and
+# per-process RSS of the llama-server sidecar.
+sysinfo = { version = "0.40", default-features = false, features = ["system", "disk"] }
+parking_lot = "0.12"
+zip = "2"
+fs2 = "0.4"
+reqwest-eventsource = "0.6"
+walkdir = "2"
+base64 = "0.22"
+# Sidecar lifetime tied to the app via a Job Object with KILL_ON_JOB_CLOSE —
+# without it, hard-killing the app (tauri dev rebuild, crash) orphans
+# llama-server/worker/tts-server children and leaks their VRAM (winjob.rs).
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.60", features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_System_JobObjects",
+    # Planner hardware profile: storage device model name of the models drive.
+    "Win32_Storage_FileSystem",
+    "Win32_System_IO",
+    "Win32_System_Ioctl",
+    "Win32_System_SystemInformation",
+    "Win32_System_ProcessStatus",
+    "Win32_System_Threading",
+] }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["test-util"] }
+tempfile = "3"
+# ---------------------------------------------------------------------------
+# Hardware-accelerated SHA-256
+#
+# sha2 0.10 already dispatches to SHA-NI (x86 SHA extensions) at *runtime*
+# via cpufeatures in every profile, so release builds get hardware hashing
+# with no flags. We deliberately do NOT set `-C target-feature=+sha` in
+# .cargo/config.toml: rustflags apply target-wide, and statically assuming
+# SHA-NI produces binaries that crash with an illegal instruction on CPUs
+# without the extension (e.g. Intel desktop parts before Ice Lake). The
+# remaining problem was dev builds, where sha2's compress function runs
+# unoptimized — opt just that package so integrity verification is fast in
+# `tauri dev` too (the rest of the dev profile keeps fast incremental builds).
+# ---------------------------------------------------------------------------
+[profile.dev.package.sha2]
+opt-level = 3

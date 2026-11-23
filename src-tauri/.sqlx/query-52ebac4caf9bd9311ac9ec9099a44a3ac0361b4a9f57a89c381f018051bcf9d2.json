@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE downloads\n            SET dest_path = ?2 || substr(dest_path, length(?1) + 1)\n          WHERE substr(dest_path, 1, length(?1)) = ?1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "52ebac4caf9bd9311ac9ec9099a44a3ac0361b4a9f57a89c381f018051bcf9d2"
+}

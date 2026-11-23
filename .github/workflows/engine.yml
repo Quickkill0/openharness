@@ -1,0 +1,90 @@
+name: Engine
+
+# Linux CPU-only build and tests for the native engine in engine/.
+# Runs only when engine files (or this workflow) change, and not for changes
+# that touch only engine docs or license texts. No GPU on CI: the CUDA build
+# is checked locally on Windows before each push.
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - "engine/**"
+      - "!engine/**/*.md"
+      - "!engine/NOTICE"
+      - "!engine/LICENSES/**"
+      - ".github/workflows/engine.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "engine/**"
+      - "!engine/**/*.md"
+      - "!engine/NOTICE"
+      - "!engine/LICENSES/**"
+      - ".github/workflows/engine.yml"
+
+# Superseded pull-request runs are cancelled; pushes to main and dev finish.
+concurrency:
+  group: engine-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  linux-cpu:
+    name: Engine — Linux CPU build and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      # One absolute directory for both ccache and actions/cache.
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_MAXSIZE: 2G
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_NOHASHDIR: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build ccache
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.ccache
+          key: engine-ccache-${{ runner.os }}-${{ hashFiles('engine/UPSTREAM.json') }}-${{ github.sha }}
+          restore-keys: |
+            engine-ccache-${{ runner.os }}-${{ hashFiles('engine/UPSTREAM.json') }}-
+            engine-ccache-${{ runner.os }}-
+
+      - name: ccache configuration
+        run: |
+          ccache --zero-stats
+          ccache --show-config | grep -E "cache_dir|max_size|base_dir|hash_dir"
+
+      # The upstream subdirectory is excluded from the default build, so this
+      # builds only openharness-engine-server, the engine test tools and the
+      # upstream unit-test executables, not upstream's other tools.
+      - name: Configure
+        run: >
+          cmake -S engine -B engine/build -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DOH_ENGINE_BUILD_TESTS=ON
+          -DOH_ENGINE_BUILD_UPSTREAM_TESTS=ON
+          -DGGML_NATIVE=OFF
+          -DGGML_CCACHE=ON
+
+      - name: Build
+        run: cmake --build engine/build --parallel 4
+
+      - name: ccache statistics
+        if: always()
+        run: ccache --show-stats
+
+      - name: Engine tests
+        run: ctest --test-dir engine/build -L engine --output-on-failure --timeout 300
+
+      # Upstream's "main" set, minus the two tests that download a model from
+      # Hugging Face. Everything else uses generated random-weight models.
+      - name: Upstream unit tests (no downloads)
+        run: ctest --test-dir engine/build -L main -E "^(test-download-model|test-thread-safety)$" --output-on-failure --timeout 900 -j 4

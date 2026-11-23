@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO assets_fts (asset_id, prompt, model, task) VALUES (?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "36d8e3bba59a6a6e01ca5cb83028efdb6f07f3579c2a424f57d3757059cea10f"
+}

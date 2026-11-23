@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO models\n           (id, repo_id, revision, display_name, architecture, capability,\n            format, task, local_path, params_b, quantization, context_train, installed_at)\n           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n           ON CONFLICT(id) DO UPDATE SET\n             installed_at  = excluded.installed_at,\n             architecture  = excluded.architecture,\n             capability    = excluded.capability,\n             format        = excluded.format,\n             task          = excluded.task,\n             local_path    = excluded.local_path,\n             params_b      = excluded.params_b,\n             quantization  = excluded.quantization,\n             context_train = excluded.context_train",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 13
+    },
+    "nullable": []
+  },
+  "hash": "1e14d9fac8e1b5dc7d22a43ea31c9b8330f0a1c3be4aec9eb7a6f3a7aabdcd0e"
+}

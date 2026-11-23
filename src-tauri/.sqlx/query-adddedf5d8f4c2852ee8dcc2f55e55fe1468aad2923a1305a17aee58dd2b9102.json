@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE engines SET active = 0 WHERE active = 1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": []
+  },
+  "hash": "adddedf5d8f4c2852ee8dcc2f55e55fe1468aad2923a1305a17aee58dd2b9102"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO messages_index (conversation_id, seq, byte_offset, byte_len, role, has_tool_use, ts)\n         VALUES (?, ?, ?, ?, ?, 0, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 6
+    },
+    "nullable": []
+  },
+  "hash": "e6382707e25d3223e269d9c0989427da0ea1e921a0d7a5358e162c86f19e2905"
+}

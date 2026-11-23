@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO engines (id, version, variant, path, sha256, active, installed_at)\n                 VALUES (?, 'b9222', 'cpu', ?, '', ?, 0)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "403076e8ba2ae29f8eac67ab0ad673ba8fe06552571cd3183e962ff81bbf132e"
+}

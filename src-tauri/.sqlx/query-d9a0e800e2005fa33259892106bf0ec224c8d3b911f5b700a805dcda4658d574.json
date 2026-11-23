@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT transcript FROM conversations WHERE id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "transcript",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "d9a0e800e2005fa33259892106bf0ec224c8d3b911f5b700a805dcda4658d574"
+}

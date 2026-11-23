@@ -1,0 +1,39 @@
+OpenHarness engine notices
+==========================
+
+The OpenHarness engine (this engine/ directory) is a modified version of
+llama.cpp, with SSD expert-streaming components derived from InferSSD. Each
+component keeps its own license; nothing here relicenses upstream code.
+
+1. llama.cpp and ggml
+   https://github.com/ggml-org/llama.cpp
+   Vendored in engine/llama.cpp/ from the upstream commit recorded in
+   engine/UPSTREAM.json (tag b12192, commit
+   9f0e5098a5d5d8adb8dd5c59036ae2a38ab07db9), pruned to the paths listed
+   there. Copyright (c) 2023-2026 The ggml authors. MIT license, see
+   engine/LICENSES/llama.cpp-MIT.txt. The notices in engine/llama.cpp/AUTHORS,
+   engine/llama.cpp/licenses/ and engine/llama.cpp/vendor/ also apply.
+
+   Files we changed or added under engine/llama.cpp/ are listed in
+   engine/PATCHES.md and carry a "Modified by OpenHarness" note.
+   `python engine/scripts/vendor_llama_cpp.py verify` checks that list against
+   the pristine upstream snapshot.
+
+2. InferSSD
+   https://github.com/wici-ai/inferssd
+   Copyright (c) 2026 WiCi AI and the InferSSD contributors. Apache License,
+   Version 2.0, see engine/LICENSES/InferSSD-Apache-2.0.txt. InferSSD's own
+   NOTICE is reproduced in engine/LICENSES/InferSSD-NOTICE.txt; the parts that
+   apply to code we use are carried forward here.
+   Source revision used: 84bcc569ac5f41690ad38cbd820b6113c9accc45.
+   InferSSD-derived files are listed in engine/PATCHES.md, keep their SPDX
+   identifiers and carry a "Modified by OpenHarness" note where we changed
+   them. (No InferSSD code is included yet in this revision.)
+
+3. OpenHarness additions
+   Files under engine/ outside engine/llama.cpp/ that are not InferSSD-derived
+   (build glue, scripts, tests, engine/server/main.cpp) are OpenHarness code
+   under the MIT license unless a file says otherwise.
+
+Binary distributions built with CUDA must also comply with the NVIDIA CUDA
+runtime terms. No model weights are distributed with this source tree.

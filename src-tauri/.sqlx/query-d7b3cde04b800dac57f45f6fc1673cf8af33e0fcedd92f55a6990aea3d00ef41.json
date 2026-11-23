@@ -1,0 +1,44 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT c.id, c.title, c.model_id, c.updated_at,\n                  COALESCE((SELECT COUNT(*) FROM messages_index mi WHERE mi.conversation_id = c.id), 0) AS message_count\n           FROM conversations c\n           ORDER BY c.updated_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "title",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "model_id",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "updated_at",
+        "ordinal": 3,
+        "type_info": "Integer"
+      },
+      {
+        "name": "message_count",
+        "ordinal": 4,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "d7b3cde04b800dac57f45f6fc1673cf8af33e0fcedd92f55a6990aea3d00ef41"
+}

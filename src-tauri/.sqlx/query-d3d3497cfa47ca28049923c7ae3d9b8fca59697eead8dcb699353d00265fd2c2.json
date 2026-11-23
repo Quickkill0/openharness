@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO downloads\n           (id, repo_id, revision, file, dest_path, total_bytes, downloaded,\n            status, error, chunks_json, expected_sha256, group_id, created_at, updated_at)\n           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n           ON CONFLICT(id) DO UPDATE SET\n             downloaded      = excluded.downloaded,\n             status          = excluded.status,\n             error           = excluded.error,\n             chunks_json     = excluded.chunks_json,\n             expected_sha256 = excluded.expected_sha256,\n             dest_path       = excluded.dest_path,\n             group_id        = excluded.group_id,\n             updated_at      = excluded.updated_at",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 14
+    },
+    "nullable": []
+  },
+  "hash": "d3d3497cfa47ca28049923c7ae3d9b8fca59697eead8dcb699353d00265fd2c2"
+}

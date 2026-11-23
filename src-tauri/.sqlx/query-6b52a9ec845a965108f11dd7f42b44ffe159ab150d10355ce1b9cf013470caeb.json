@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE downloads SET chunks_json = ?, downloaded = ?, updated_at = ? WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "6b52a9ec845a965108f11dd7f42b44ffe159ab150d10355ce1b9cf013470caeb"
+}

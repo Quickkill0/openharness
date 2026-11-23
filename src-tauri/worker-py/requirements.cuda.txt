@@ -1,0 +1,43 @@
+# OpenHarness worker — CUDA variant (NVIDIA, torch cu124 wheels).
+# Locked versions are pinned in M8 §8.3 when the pipelines land and are
+# verified against real models; until then this file seeds the resolver.
+# The Rust bootstrap hashes this file into the venv stamp, so any edit
+# triggers a clean re-sync.
+--extra-index-url https://download.pytorch.org/whl/cu124
+
+torch==2.6.0+cu124
+diffusers==0.38.0
+transformers==4.51.3
+accelerate==1.6.0
+# bitsandbytes 4-bit (NF4) quantization — CUDA-only wheel (deliberately NOT in
+# requirements.cpu.txt; it has no CPU build). Loads the LTX-2 companion text
+# encoder (Gemma-3-12B, ~42 GB bf16) at ~6.5 GB so model-CPU-offload can fit it
+# alongside the ~18 GB GGUF DiT on a 24 GB card. transformers' BitsAndBytesConfig
+# drives it; text_to_video._ltx_text_encoder degrades to bf16 if it's absent.
+bitsandbytes==0.45.3
+safetensors>=0.8.0
+sentencepiece==0.2.0
+protobuf==5.29.4
+gguf==0.16.0
+faster-whisper==1.1.1
+kokoro==0.9.4
+# kokoro's CLI path imports click but its wheel doesn't declare it.
+click==8.4.1
+# misaki (kokoro's G2P) needs spacy's en_core_web_sm and otherwise tries to
+# download it at first synthesis (spacy shells out to pip/uv and sys.exit(1)s
+# on failure). Pin the wheel so nothing downloads at runtime.
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+# diffusers' Wan/T5 text preprocessing imports ftfy at runtime (optional
+# extra it doesn't declare).
+ftfy==6.3.1
+# VibeVoice voice cloning (community fork — Microsoft pulled the original).
+# Pinned to commit 493b186f5b973477cadab0f93f4a5dd290cc9125 (2026-01-23) via
+# the direct archive URL so installs don't need a git binary, mirroring the
+# en-core-web-sm wheel pin above. Its own pins (transformers==4.51.3,
+# accelerate==1.6.0) match this file exactly.
+vibevoice @ https://github.com/vibevoice-community/VibeVoice/archive/493b186f5b973477cadab0f93f4a5dd290cc9125.tar.gz
+soundfile==0.13.1
+imageio==2.37.0
+imageio-ffmpeg==0.6.0
+numpy==2.2.5
+pillow==11.2.1

@@ -1,0 +1,7 @@
+# Vendored upstream snapshot: keep bytes exactly as upstream ships them so
+# vendor_llama_cpp.py verify can compare them.
+llama.cpp/** -text
+# InferSSD imports: same rule, so inferssd_import.py verify can compare hashes.
+inferssd/** -text
+# cmd.exe mis-parses labels in LF batch files.
+*.cmd text eol=crlf

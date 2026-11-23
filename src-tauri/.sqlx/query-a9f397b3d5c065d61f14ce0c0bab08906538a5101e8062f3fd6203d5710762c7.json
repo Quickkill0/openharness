@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO download_groups (id, repo_id, revision, format, task, created_at)\n           VALUES (?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 6
+    },
+    "nullable": []
+  },
+  "hash": "a9f397b3d5c065d61f14ce0c0bab08906538a5101e8062f3fd6203d5710762c7"
+}

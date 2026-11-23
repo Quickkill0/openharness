@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE models\n           SET architecture = ?,\n               params_b = ?,\n               quantization = COALESCE(?, quantization),\n               context_train = ?\n           WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": []
+  },
+  "hash": "05bac8892878273116573727036d590525ebf3776a763481cd01f17e6b8f2303"
+}

@@ -1,0 +1,56 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, version, variant, path, sha256, active, installed_at\n         FROM engines ORDER BY installed_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "version",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "variant",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "path",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "sha256",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "active",
+        "ordinal": 5,
+        "type_info": "Integer"
+      },
+      {
+        "name": "installed_at",
+        "ordinal": 6,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "e7f3fe9fbff364fec862e0bf2e095699aaf1ca68fc8cb43597cb11c3d7a92e1c"
+}

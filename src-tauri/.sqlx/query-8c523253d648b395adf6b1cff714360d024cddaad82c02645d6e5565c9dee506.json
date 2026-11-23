@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT m.id AS \"id!\", mf.path AS \"path!\"\n           FROM models m\n           JOIN model_files mf ON mf.model_id = m.id AND mf.role = 'primary'\n           WHERE m.format = 'gguf' AND m.architecture IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "path!",
+        "ordinal": 1,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      true,
+      false
+    ]
+  },
+  "hash": "8c523253d648b395adf6b1cff714360d024cddaad82c02645d6e5565c9dee506"
+}

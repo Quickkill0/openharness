@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE generation_jobs\n           SET status = 'done', outputs = ?, meta = ?, finished_at = ?\n           WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "79273949b3567812dfb5fda39fe501b6dfab11ecf5dc9d47c4bfb066e0df9c1c"
+}

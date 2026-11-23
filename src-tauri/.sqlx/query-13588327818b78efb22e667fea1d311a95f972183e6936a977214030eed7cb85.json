@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE download_groups SET registration_closed = 1 WHERE id = ? AND format = 'gguf' AND registration_closed = 0",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "13588327818b78efb22e667fea1d311a95f972183e6936a977214030eed7cb85"
+}

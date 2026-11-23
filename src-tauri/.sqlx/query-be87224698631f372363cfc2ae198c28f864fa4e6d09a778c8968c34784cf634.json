@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE generation_jobs\n           SET status = 'error', error = 'interrupted by app shutdown', finished_at = ?\n           WHERE status = 'running'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "be87224698631f372363cfc2ae198c28f864fa4e6d09a778c8968c34784cf634"
+}

@@ -1,0 +1,118 @@
+/*
+ * Markdown styles for sanitized assistant content, scoped under `.chat-md`.
+ * Shared by MarkdownMessage (static) and StreamingMarkdown (live stream) so
+ * the streamed turn and the persisted turn render identically.
+ */
+.chat-md p {
+	margin: 0 0 0.6rem;
+}
+.chat-md p:last-child {
+	margin-bottom: 0;
+}
+.chat-md ul,
+.chat-md ol {
+	margin: 0 0 0.6rem;
+	padding-left: 1.25rem;
+}
+.chat-md ul {
+	list-style: disc;
+}
+.chat-md ol {
+	list-style: decimal;
+}
+.chat-md li {
+	margin: 0.15rem 0;
+}
+.chat-md a {
+	color: var(--primary);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+.chat-md h1,
+.chat-md h2,
+.chat-md h3,
+.chat-md h4 {
+	font-weight: 600;
+	margin: 0.8rem 0 0.4rem;
+	line-height: 1.3;
+}
+.chat-md h1 {
+	font-size: 1.125rem;
+}
+.chat-md h2 {
+	font-size: 1rem;
+}
+.chat-md h3 {
+	font-size: 0.9375rem;
+}
+.chat-md code {
+	font-family: var(--font-mono);
+	font-size: 0.85em;
+	background: color-mix(in oklch, var(--muted) 60%, transparent);
+	padding: 0.1rem 0.3rem;
+	border-radius: 6px;
+}
+.chat-md pre {
+	position: relative;
+	background: var(--background);
+	border: 1px solid var(--border);
+	border-radius: 10px;
+	padding: 0.75rem 0.85rem;
+	overflow-x: auto;
+	margin: 0 0 0.6rem;
+}
+.chat-md pre code {
+	background: transparent;
+	padding: 0;
+	font-size: 0.8125rem;
+}
+.chat-md blockquote {
+	border-left: 3px solid var(--primary);
+	padding-left: 0.75rem;
+	margin: 0 0 0.6rem;
+	color: var(--muted-foreground);
+}
+.chat-md table {
+	border-collapse: collapse;
+	margin: 0 0 0.6rem;
+	font-size: 0.8125rem;
+}
+.chat-md th,
+.chat-md td {
+	border: 1px solid var(--border);
+	padding: 0.3rem 0.5rem;
+}
+.chat-md .code-copy {
+	position: absolute;
+	top: 0.4rem;
+	right: 0.4rem;
+	font-size: 0.6875rem;
+	padding: 0.1rem 0.45rem;
+	border-radius: 6px;
+	border: 1px solid var(--border);
+	background: var(--elevated);
+	color: var(--muted-foreground);
+	opacity: 0;
+	transition: opacity 150ms ease;
+	cursor: pointer;
+}
+.chat-md pre:hover .code-copy {
+	opacity: 1;
+}
+.chat-md .code-copy:hover {
+	color: var(--foreground);
+	border-color: var(--primary);
+}
+
+/* Blinking end-of-stream cursor (StreamingMarkdown injects it inline after
+   the last rendered text node, including inside code blocks). */
+.chat-md .stream-cursor {
+	color: var(--primary);
+	animation: chat-md-blink 1s steps(2) infinite;
+	user-select: none;
+}
+@keyframes chat-md-blink {
+	50% {
+		opacity: 0;
+	}
+}

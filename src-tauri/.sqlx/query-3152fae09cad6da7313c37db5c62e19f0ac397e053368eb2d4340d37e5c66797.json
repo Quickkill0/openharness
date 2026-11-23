@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO engines (id, version, variant, path, sha256, active, installed_at)\n         VALUES (?, ?, ?, ?, ?, ?, ?)\n         ON CONFLICT(id) DO UPDATE SET\n           version      = excluded.version,\n           variant      = excluded.variant,\n           path         = excluded.path,\n           sha256       = excluded.sha256,\n           active       = excluded.active,\n           installed_at = excluded.installed_at",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 7
+    },
+    "nullable": []
+  },
+  "hash": "3152fae09cad6da7313c37db5c62e19f0ac397e053368eb2d4340d37e5c66797"
+}

@@ -1,0 +1,229 @@
+name: Engine package
+
+on:
+  workflow_dispatch:
+    inputs:
+      cuda_architectures:
+        description: 'CMAKE_CUDA_ARCHITECTURES (e.g. 89 or 86;89)'
+        type: string
+        default: '89'
+        required: true
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/engine-package.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: engine-package-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  windows-cuda:
+    name: Windows CUDA package
+    runs-on: windows-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      OH_CUDA_ARCH: ${{ inputs.cuda_architectures || '89' }}
+      OH_BUILD_DIR: ${{ github.workspace }}\engine\build-win-cuda
+      OH_BUILD_JOBS: '4'
+      OH_BUILD_TESTS: 'OFF'
+      SCCACHE_GHA_ENABLED: 'true'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Validate architectures and name the package
+        id: package
+        run: |
+          if ($env:OH_CUDA_ARCH -notmatch '^\d+[a-z]?(-real|-virtual)?(;\d+[a-z]?(-real|-virtual)?)*$') {
+            throw 'Expected a semicolon-separated CUDA architecture list, e.g. 86;89'
+          }
+          $sha = git rev-parse --short=8 HEAD
+          if ($LASTEXITCODE) { throw 'Cannot read the commit SHA' }
+          "name=openharness-engine-windows-cuda-$sha" >> $env:GITHUB_OUTPUT
+          "CUDA_PATH=$env:RUNNER_TEMP\cuda-13.3" >> $env:GITHUB_ENV
+
+      # NVIDIA's component archives avoid installing a driver or a multi-GB SDK.
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        id: cuda-cache
+        with:
+          path: ${{ env.CUDA_PATH }}
+          key: cuda-windows-x64-13.3.0-components-v1
+
+      - name: Install CUDA 13.3 toolkit components
+        if: steps.cuda-cache.outputs.cache-hit != 'true'
+        run: |
+          $base = 'https://developer.download.nvidia.com/compute/cuda/redist'
+          $manifest = Invoke-RestMethod "$base/redistrib_13.3.0.json"
+          New-Item -ItemType Directory -Force $env:CUDA_PATH | Out-Null
+          foreach ($component in @('cccl', 'cuda_crt', 'cuda_nvcc', 'cuda_cudart', 'libcublas', 'libnvvm')) {
+            $entry = $manifest.$component.'windows-x86_64'
+            $archive = Join-Path $env:RUNNER_TEMP "$component.zip"
+            Invoke-WebRequest "$base/$($entry.relative_path)" -OutFile $archive
+            if ((Get-FileHash $archive -Algorithm SHA256).Hash -ne $entry.sha256) {
+              throw "Checksum mismatch: $component"
+            }
+            $unpack = Join-Path $env:RUNNER_TEMP $component
+            Expand-Archive $archive -DestinationPath $unpack
+            $roots = @(Get-ChildItem $unpack -Directory)
+            if ($roots.Count -ne 1) { throw "Unexpected archive layout: $component" }
+            $root = $roots[0]
+            Copy-Item "$($root.FullName)\*" $env:CUDA_PATH -Recurse -Force
+            # Keep component licenses distinct when merging the toolkit layout.
+            $licenses = Join-Path $env:CUDA_PATH 'licenses'
+            New-Item -ItemType Directory -Force $licenses | Out-Null
+            # Preserve the license supplied with each component archive.
+            if (Test-Path "$($root.FullName)\LICENSE") {
+              Copy-Item "$($root.FullName)\LICENSE" "$licenses\$component-LICENSE.txt"
+            } elseif (Test-Path "$($root.FullName)\LICENSE.txt") {
+              Copy-Item "$($root.FullName)\LICENSE.txt" "$licenses\$component-LICENSE.txt"
+            } else {
+              throw "Missing license: $component"
+            }
+          }
+
+      - name: Check nvcc version
+        run: |
+          "$env:CUDA_PATH\bin" >> $env:GITHUB_PATH
+          "$env:CUDA_PATH\bin\x64" >> $env:GITHUB_PATH
+          "$env:CUDA_PATH\nvvm\bin\x64" >> $env:GITHUB_PATH
+          $version = & "$env:CUDA_PATH\bin\nvcc.exe" --version
+          if ($LASTEXITCODE -or ($version -join "`n") -notmatch 'release 13\.3,') {
+            throw 'Expected nvcc 13.3'
+          }
+          $version
+
+      # sccache supports cl.exe; Release builds do not use shared /Zi PDBs.
+      # nvcc is uncached: sccache cannot parse its quoted Windows definitions
+      # (mozilla/sccache#2470). A cold, full-kernel build takes about an hour.
+      - uses: mozilla-actions/sccache-action@7d986dd989559c6ecdb630a3fd2557667be217ad # v0.0.9
+        with:
+          version: 'v0.10.0'
+
+      - name: Build the CUDA engine
+        shell: cmd
+        # NATIVE=OFF selects a fixed AVX2 baseline, not host ISA detection.
+        # CUDA 13.3's cuda.lib statically loads the driver on demand, so there
+        # is no nvcuda.dll import to delay-load. Keep VMM and verify the actual
+        # final-link map instead of requiring a nonexistent PE driver import.
+        env:
+          LDFLAGS: '/MAP:engine-vmm.map'
+        run: >-
+          call engine\scripts\build_windows.cmd cuda
+          "-DGGML_NATIVE=OFF"
+          "-DGGML_CUDA_NO_VMM=OFF"
+          "-DBUILD_SHARED_LIBS=OFF"
+          "-DOH_ENGINE_BUILD_UPSTREAM_TESTS=OFF"
+          "-DGGML_CCACHE=OFF"
+          "-DCMAKE_C_COMPILER_LAUNCHER=sccache"
+          "-DCMAKE_CXX_COMPILER_LAUNCHER=sccache"
+
+      - name: Stage the executable, runtime DLLs and notices
+        run: |
+          $stage = Join-Path $env:RUNNER_TEMP 'engine-package'
+          cmake --install $env:OH_BUILD_DIR --prefix $stage --config Release
+          if ($LASTEXITCODE) { throw 'cmake --install failed' }
+          # Also handles ggml/llama DLLs if the build ever switches to shared.
+          Get-ChildItem "$env:OH_BUILD_DIR\bin\*.dll" | Copy-Item -Destination "$stage\bin"
+          foreach ($dll in @('cudart64_13.dll', 'cublas64_13.dll', 'cublasLt64_13.dll')) {
+            Copy-Item "$env:CUDA_PATH\bin\x64\$dll" "$stage\bin"
+          }
+          foreach ($component in @('cuda_cudart', 'libcublas')) {
+            Copy-Item "$env:CUDA_PATH\licenses\$component-LICENSE.txt" "$stage\share\openharness-engine"
+          }
+          # App-local Microsoft redistributables, not the runner's System32 DLLs.
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vs = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if ($LASTEXITCODE -or !$vs) { throw 'Cannot find Visual Studio redistributables' }
+          $redist = Get-ChildItem "$vs\VC\Redist\MSVC" -Directory |
+            Where-Object Name -Match '^\d+\.\d+\.\d+$' |
+            Sort-Object { [version]$_.Name } -Descending | Select-Object -First 1
+          foreach ($kind in @('CRT', 'OpenMP')) {
+            $dir = Get-ChildItem "$($redist.FullName)\x64\Microsoft.VC*.$kind" -Directory
+            if (!$dir) { throw "Missing MSVC $kind redistributables" }
+            Copy-Item "$($dir.FullName)\*.dll" "$stage\bin"
+          }
+          $notice = @(
+            'Microsoft Visual C++ runtime and OpenMP redistributables',
+            'Copyright (c) Microsoft Corporation. All rights reserved.',
+            'These DLLs are separately licensed Microsoft software, not MIT/Apache-2.0 code.',
+            'Use and redistribution are subject to the applicable Visual Studio license:',
+            'https://visualstudio.microsoft.com/license-terms/',
+            'REDIST lists for the supported Visual Studio generations:',
+            'https://learn.microsoft.com/visualstudio/releases/2022/redistribution',
+            'https://learn.microsoft.com/visualstudio/releases/2026/redistribution',
+            '',
+            'Included files (original version and copyright notices):'
+          )
+          $notice += Get-ChildItem "$stage\bin\*.dll" | Where-Object {
+            $_.VersionInfo.CompanyName -match 'Microsoft'
+          } | ForEach-Object {
+            "$($_.Name): $($_.VersionInfo.FileVersion); $($_.VersionInfo.LegalCopyright)"
+          }
+          $notice | Set-Content "$stage\share\openharness-engine\MICROSOFT-RUNTIME-NOTICE.txt" -Encoding utf8NoBOM
+          # CUDA 13.3 resolves driver APIs through its static cuda.lib loader.
+          # Prove VMM is enabled AND its allocation APIs reached the final exe.
+          $cache = Join-Path $env:OH_BUILD_DIR 'CMakeCache.txt'
+          $map = Join-Path $env:OH_BUILD_DIR 'engine-vmm.map'
+          if (!(Test-Path $cache -PathType Leaf) -or !(Test-Path $map -PathType Leaf)) {
+            throw 'Missing CMake cache or final-link map for the VMM check'
+          }
+          $vmm = Select-String -Path $cache -Pattern '^GGML_CUDA_NO_VMM:BOOL=OFF$'
+          if (!$vmm) { throw 'Expected GGML_CUDA_NO_VMM:BOOL=OFF' }
+          $vmm.Line
+          foreach ($symbol in @('cuMemCreate', 'cuMemMap', 'cuMemAddressReserve')) {
+            # MSVC maps show the archive as cuda:object.obj (without .lib).
+            $resolved = Select-String -Path $map -Pattern "^\s+[0-9a-f]+:[0-9a-f]+\s+$symbol\s+[0-9a-f]+\s+f\s+cuda(?:\.lib)?:\S+\.obj\s*$"
+            if (!$resolved) { throw "VMM symbol $symbol was not resolved from cuda.lib" }
+            $resolved.Line
+          }
+
+      - name: Smoke-test the packaged engine without the toolkit on PATH
+        run: |
+          $stage = Join-Path $env:RUNNER_TEMP 'engine-package'
+          $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
+          $info = & "$stage\bin\openharness-engine-server.exe" --engine-info
+          if ($LASTEXITCODE) { throw "--engine-info failed: $LASTEXITCODE" }
+          $info
+          $record = ($info -join "`n") | ConvertFrom-Json
+          if ($record.features.ssd_expert_streaming -ne $true -or
+              $record.features.cuda_vram_expert_tier -ne $true) {
+            throw 'Package is missing SSD streaming or the CUDA VRAM expert tier'
+          }
+          # Empty CUDA device lists are expected on the standard, GPU-less runner.
+          $info | Set-Content "$stage\engine-info.json" -Encoding utf8NoBOM
+          "### Packaged engine --engine-info`n``````json`n$info`n``````" >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Hash and zip the package
+        env:
+          PACKAGE_NAME: ${{ steps.package.outputs.name }}
+        run: |
+          $stage = Join-Path $env:RUNNER_TEMP 'engine-package'
+          $sums = Get-ChildItem $stage -Recurse -File | Sort-Object FullName | ForEach-Object {
+            $relative = [IO.Path]::GetRelativePath($stage, $_.FullName).Replace('\', '/')
+            "$((Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant())  $relative"
+          }
+          $sums | Set-Content "$stage\SHA256SUMS" -Encoding ascii
+          Get-ChildItem $stage -Recurse -File | ForEach-Object {
+            "$([IO.Path]::GetRelativePath($stage, $_.FullName)) ($($_.Length) bytes)"
+          }
+          $zip = Join-Path $env:RUNNER_TEMP "$env:PACKAGE_NAME.zip"
+          Compress-Archive -Path "$stage\*" -DestinationPath $zip -CompressionLevel Optimal
+          "Package: $env:PACKAGE_NAME.zip ($((Get-Item $zip).Length) bytes)" >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Upload the downloadable zip
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ${{ steps.package.outputs.name }}
+          path: ${{ runner.temp }}/${{ steps.package.outputs.name }}.zip
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14

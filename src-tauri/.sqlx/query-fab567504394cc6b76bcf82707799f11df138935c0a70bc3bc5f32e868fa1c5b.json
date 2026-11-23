@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM messages_fts WHERE conversation_id = ? AND seq >= ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "fab567504394cc6b76bcf82707799f11df138935c0a70bc3bc5f32e868fa1c5b"
+}

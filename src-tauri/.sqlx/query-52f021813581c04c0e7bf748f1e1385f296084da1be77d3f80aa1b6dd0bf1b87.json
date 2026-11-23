@@ -1,0 +1,68 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, task, status, params, outputs, meta, error, created_at, finished_at\n                   FROM generation_jobs\n                   ORDER BY created_at DESC, id DESC LIMIT ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "task",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "status",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "params",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "outputs",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "meta",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "error",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "created_at",
+        "ordinal": 7,
+        "type_info": "Integer"
+      },
+      {
+        "name": "finished_at",
+        "ordinal": 8,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "52f021813581c04c0e7bf748f1e1385f296084da1be77d3f80aa1b6dd0bf1b87"
+}
